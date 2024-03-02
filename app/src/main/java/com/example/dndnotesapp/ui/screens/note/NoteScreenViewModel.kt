@@ -1,39 +1,61 @@
 package com.example.dndnotesapp.ui.screens.note
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.dndnotesapp.data.NotesRepository
-import com.example.dndnotesapp.ui.AppViewModelProvider
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 class NoteScreenViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val notesRepository: NotesRepository
 ) : ViewModel() {
-    private val id: Int = savedStateHandle["id"] ?: 0
-    val noteScreenUiState: StateFlow<NoteScreenUiState> =
-        notesRepository.getNote(id)
-            .filterNotNull()
-            .map {
-                NoteScreenUiState(
-                    noteDetails = it.toNoteDetails()
-                )
-            }.stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(AppViewModelProvider.TIMEOUT_MILLIS),
-                initialValue = NoteScreenUiState(
-                    noteDetails = NoteDetails()
-                )
+    private val id: Int = checkNotNull(savedStateHandle["id"])
+    var noteScreenUiState by mutableStateOf(
+        NoteScreenUiState(
+            NoteDetails()
+        )
+    )
+        private set
+
+    init {
+        viewModelScope.launch {
+            noteScreenUiState = NoteScreenUiState(
+                notesRepository.getNote(id)
+                    .filterNotNull()
+                    .first()
+                    .toNoteDetails()
             )
-    fun onHeadlineChange(newHeadline: String) {
-        TODO()
+        }
     }
-    fun onTextChange(newText: String) {
-        TODO()
+
+    fun updateNote() {
+        viewModelScope.launch {
+            notesRepository.updateNote(
+                noteScreenUiState.noteDetails.toNote()
+            )
+        }
+    }
+
+    fun updateHeadline(newHeadline: String) {
+        noteScreenUiState = NoteScreenUiState(
+            noteDetails = noteScreenUiState.noteDetails.copy(
+                headline = newHeadline
+            )
+        )
+    }
+
+    fun updateText(newText: String) {
+        noteScreenUiState = NoteScreenUiState(
+            noteDetails = noteScreenUiState.noteDetails.copy(
+                text = newText
+            )
+        )
     }
 }

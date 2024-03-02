@@ -17,3 +17,9 @@ fun Note.toNoteDetails(): NoteDetails = NoteDetails(
     headline = this.headline,
     text = this.text
 )
+
+fun NoteDetails.toNote(): Note = Note(
+    id = this.id,
+    headline = this.headline,
+    text = this.text
+)

@@ -9,22 +9,25 @@ import androidx.navigation.navArgument
 import com.example.dndnotesapp.data.Note
 import com.example.dndnotesapp.ui.screens.home.HomeScreen
 import com.example.dndnotesapp.ui.screens.note.NoteScreen
-import com.example.dndnotesapp.ui.screens.note.NoteScreenUiState
 
 @Composable
 fun Navigation(
     navController: NavHostController,
-    notes: List<Note>,
-    noteScreenUiState: NoteScreenUiState,
-    onHeadlineChange: (String) -> Unit,
-    onTextChange: (String) -> Unit
+    addNewNote: () -> Unit,
+    notes: List<Note>
 ) {
     NavHost(
         navController = navController,
         startDestination = ApplicationScreens.Home.name
-    ){
+    ) {
         composable(route = ApplicationScreens.Home.name) {
-            HomeScreen(notes = notes)
+            HomeScreen(
+                notes = notes,
+                navigateToNote = { id: Int ->
+                    navController.navigate("${ApplicationScreens.Note.name}/$id")
+                },
+                addNewNote = addNewNote
+            )
         }
         composable(
             route = "${ApplicationScreens.Note.name}/{id}",
@@ -35,9 +38,7 @@ fun Navigation(
             )
         ) {
             NoteScreen(
-                noteScreenUiState = noteScreenUiState,
-                onHeadlineChange = onHeadlineChange,
-                onTextChange = onTextChange
+                navigateUp = navController::navigateUp
             )
         }
     }
