@@ -1,4 +1,4 @@
-package com.example.dndnotesapp.ui.utils
+package com.example.dndnotesapp.ui.navigation
 
 enum class ApplicationScreens {
     Home,
