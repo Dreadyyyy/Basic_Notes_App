@@ -17,29 +17,46 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.dndnotesapp.ui.AppViewModelProvider
+import com.example.dndnotesapp.ui.theme.DnDNotesAppTheme
 
 @Composable
 fun NoteScreen(
     noteScreenViewModel: NoteScreenViewModel = viewModel(factory = AppViewModelProvider.Factory),
     navigateUp: () -> Unit
 ) {
-    BackHandler {
+    val customNavigateUp: () -> Unit = {
         noteScreenViewModel.updateNote()
         navigateUp()
     }
+    BackHandler {
+        customNavigateUp()
+    }
+    val noteScreenUiState: NoteScreenUiState = noteScreenViewModel.noteScreenUiState
+    NoteScreenContent(
+        noteScreenUiState = noteScreenUiState,
+        navigateUp = customNavigateUp,
+        updateHeadline = noteScreenViewModel::updateHeadline,
+        updateText = noteScreenViewModel::updateText
+    )
+}
+
+@Composable
+fun NoteScreenContent(
+    noteScreenUiState: NoteScreenUiState,
+    navigateUp: () -> Unit,
+    updateHeadline: (String) -> Unit,
+    updateText: (String) -> Unit,
+) {
     Scaffold(
         topBar = {
             NoteScreenTopBar(
-                navigateUp = {
-                    noteScreenViewModel.updateNote()
-                    navigateUp()
-                }
+                navigateUp = navigateUp
             )
         }
     ) { innerPadding: PaddingValues ->
-        val noteScreenUiState: NoteScreenUiState = noteScreenViewModel.noteScreenUiState
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -47,12 +64,14 @@ fun NoteScreen(
         ) {
             TextField(
                 value = noteScreenUiState.noteDetails.headline,
-                onValueChange = noteScreenViewModel::updateHeadline,
+                onValueChange = updateHeadline,
+                placeholder = { Text(text = "Headline") },
                 modifier = Modifier.fillMaxWidth()
             )
             TextField(
                 value = noteScreenUiState.noteDetails.text,
-                onValueChange = noteScreenViewModel::updateText,
+                onValueChange = updateText,
+                placeholder = { Text(text = "Text") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1F)
@@ -81,4 +100,22 @@ fun NoteScreenTopBar(
         },
         modifier = modifier
     )
+}
+
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun NoteScreenPreview(
+    noteScreenUiState: NoteScreenUiState = NoteScreenUiState(
+        NoteDetails()
+    )
+) {
+    DnDNotesAppTheme {
+        NoteScreenContent(
+            noteScreenUiState = noteScreenUiState,
+            navigateUp = {},
+            updateHeadline = {},
+            updateText = {}
+        )
+    }
 }
