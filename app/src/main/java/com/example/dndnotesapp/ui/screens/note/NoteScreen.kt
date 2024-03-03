@@ -8,11 +8,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -28,18 +32,32 @@ fun NoteScreen(
     navigateUp: () -> Unit
 ) {
     val customNavigateUp: () -> Unit = {
-        noteScreenViewModel.updateNote()
         navigateUp()
+        noteScreenViewModel.updateNote()
     }
     BackHandler {
         customNavigateUp()
     }
     val noteScreenUiState: NoteScreenUiState = noteScreenViewModel.noteScreenUiState
+    val showingDeleteDialog: Boolean = noteScreenUiState.showingDeleteDialog
+    when {
+        showingDeleteDialog -> {
+            DeleteDialog(
+                onDismissRequest = noteScreenViewModel::hideDeleteDialog,
+                deleteNote = {
+                    noteScreenViewModel.hideDeleteDialog()
+                    navigateUp()
+                    noteScreenViewModel.deleteNote()
+                }
+            )
+        }
+    }
     NoteScreenContent(
         noteScreenUiState = noteScreenUiState,
         navigateUp = customNavigateUp,
         updateHeadline = noteScreenViewModel::updateHeadline,
-        updateText = noteScreenViewModel::updateText
+        updateText = noteScreenViewModel::updateText,
+        showDeleteDialog = noteScreenViewModel::showDeleteDialog
     )
 }
 
@@ -49,11 +67,13 @@ fun NoteScreenContent(
     navigateUp: () -> Unit,
     updateHeadline: (String) -> Unit,
     updateText: (String) -> Unit,
+    showDeleteDialog: () -> Unit
 ) {
     Scaffold(
         topBar = {
             NoteScreenTopBar(
-                navigateUp = navigateUp
+                navigateUp = navigateUp,
+                showDeleteDialog = showDeleteDialog
             )
         }
     ) { innerPadding: PaddingValues ->
@@ -84,6 +104,7 @@ fun NoteScreenContent(
 @Composable
 fun NoteScreenTopBar(
     navigateUp: () -> Unit,
+    showDeleteDialog: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     TopAppBar(
@@ -98,10 +119,40 @@ fun NoteScreenTopBar(
                 )
             }
         },
+        actions = {
+            IconButton(onClick = showDeleteDialog) {
+                Icon(imageVector = Icons.Filled.Delete, contentDescription = "Delete")
+            }
+        },
         modifier = modifier
     )
 }
 
+@Composable
+fun DeleteDialog(
+    onDismissRequest: () -> Unit,
+    deleteNote: () -> Unit
+) {
+    AlertDialog(
+        icon = {
+            Icon(imageVector = Icons.Filled.Warning, contentDescription = null)
+        },
+        text = {
+            Text(text = "I you sure you want to delete this note")
+        },
+        onDismissRequest = onDismissRequest,
+        confirmButton = {
+            TextButton(onClick = deleteNote) {
+                Text(text = "Delete")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text(text = "Cancel")
+            }
+        }
+    )
+}
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
@@ -115,7 +166,8 @@ fun NoteScreenPreview(
             noteScreenUiState = noteScreenUiState,
             navigateUp = {},
             updateHeadline = {},
-            updateText = {}
+            updateText = {},
+            showDeleteDialog = {}
         )
     }
 }

@@ -3,7 +3,8 @@ package com.example.dndnotesapp.ui.screens.note
 import com.example.dndnotesapp.data.Note
 
 data class NoteScreenUiState(
-    val noteDetails: NoteDetails
+    val noteDetails: NoteDetails,
+    val showingDeleteDialog: Boolean = false
 )
 
 data class NoteDetails(

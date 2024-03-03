@@ -43,6 +43,13 @@ class NoteScreenViewModel(
         }
     }
 
+    fun deleteNote() {
+        viewModelScope.launch {
+            notesRepository.deleteNote(
+                noteScreenUiState.noteDetails.toNote()
+            )
+        }
+    }
     fun updateHeadline(newHeadline: String) {
         noteScreenUiState = NoteScreenUiState(
             noteDetails = noteScreenUiState.noteDetails.copy(
@@ -56,6 +63,17 @@ class NoteScreenViewModel(
             noteDetails = noteScreenUiState.noteDetails.copy(
                 text = newText
             )
+        )
+    }
+
+    fun showDeleteDialog() {
+        noteScreenUiState = noteScreenUiState.copy(
+            showingDeleteDialog = true
+        )
+    }
+    fun hideDeleteDialog() {
+        noteScreenUiState = noteScreenUiState.copy(
+            showingDeleteDialog = false
         )
     }
 }
