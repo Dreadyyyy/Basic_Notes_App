@@ -1,3 +1,5 @@
+package com.example.dndnotesapp
+
 import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
