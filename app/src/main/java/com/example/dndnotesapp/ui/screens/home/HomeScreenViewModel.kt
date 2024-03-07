@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.dndnotesapp.data.Note
 import com.example.dndnotesapp.data.NotesRepository
 import com.example.dndnotesapp.ui.AppViewModelProvider
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -14,13 +15,9 @@ import kotlinx.coroutines.launch
 class HomeScreenViewModel(
     private val notesRepository: NotesRepository
 ) : ViewModel() {
-    val homeScreenUiState: StateFlow<HomeScreenUiState> =
+    val homeScreenUiState: Flow<HomeScreenUiState> =
         notesRepository.getAllNotes()
-            .map { HomeScreenUiState(it) }.stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(AppViewModelProvider.TIMEOUT_MILLIS),
-                initialValue = HomeScreenUiState()
-            )
+            .map { HomeScreenUiState(it) }
     fun addNewNote(note: Note) {
         viewModelScope.launch {
             notesRepository.insertNote(note)

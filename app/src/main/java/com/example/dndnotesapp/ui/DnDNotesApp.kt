@@ -15,14 +15,9 @@ import com.example.dndnotesapp.ui.screens.note.NoteScreenViewModel
 import kotlinx.coroutines.flow.StateFlow
 
 @Composable
-fun DnDNotesApp(
-    homeScreenViewModel: HomeScreenViewModel = viewModel(factory = AppViewModelProvider.Factory)
-) {
-    val homeScreenUiState by homeScreenViewModel.homeScreenUiState.collectAsState()
+fun DnDNotesApp() {
     val navHostController: NavHostController = rememberNavController()
     Navigation(
-        navController = navHostController,
-        notes = homeScreenUiState.notesList,
-        addNewNote = { homeScreenViewModel.addNewNote(Note(headline = "", text = ""))}
+        navController = navHostController
     )
 }

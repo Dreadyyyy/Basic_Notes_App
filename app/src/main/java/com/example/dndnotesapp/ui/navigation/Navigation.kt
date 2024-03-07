@@ -12,9 +12,7 @@ import com.example.dndnotesapp.ui.screens.note.NoteScreen
 
 @Composable
 fun Navigation(
-    navController: NavHostController,
-    addNewNote: () -> Unit,
-    notes: List<Note>
+    navController: NavHostController
 ) {
     NavHost(
         navController = navController,
@@ -22,11 +20,9 @@ fun Navigation(
     ) {
         composable(route = ApplicationScreens.Home.name) {
             HomeScreen(
-                notes = notes,
                 navigateToNote = { id: Int ->
                     navController.navigate("${ApplicationScreens.Note.name}/$id")
-                },
-                addNewNote = addNewNote
+                }
             )
         }
         composable(
